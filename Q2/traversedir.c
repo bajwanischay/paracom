@@ -70,7 +70,7 @@ void add(int i, char* word)
 		//#pragma omp critical
 		T->a[i]=r;//Lock
 		//printf("Inserted0 %s %d\n",word,i);
-		omp_unset_lock(&(lock[i]));
+		omp_unset_lock(&(lock[i]));	
 		return;
 	}
 		curr=T->a[i];
