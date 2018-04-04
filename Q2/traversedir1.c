@@ -10,7 +10,7 @@
 #include <math.h>
 
 using namespace std;
-
+char * ROOT;
 struct table* T;
 struct stack* top=NULL;
 char DONE;
@@ -96,6 +96,7 @@ int hash(char* a){
 }
 void readFile(char* filePath)
 {
+	printf("Thread No %d Reading File:%s\n",omp_get_thread_num(),filePath);
 	FILE* fp=fopen(filePath,"r");
 	set <string> words;
 	set<string>::iterator it;
@@ -112,6 +113,7 @@ void readFile(char* filePath)
 			add(hash(readWord),readWord);
 		}
 	}
+	fclose(fp);
 }
 
 void walk(const char *pathName) {
@@ -128,8 +130,9 @@ void walk(const char *pathName) {
       return;
    }
    char path[1024];
+   
+   #pragma omp parallel
    do {
-      
       sprintf(path, "%s/%s", pathName, entry->d_name);
       if (entry->d_type == DT_DIR && entry->d_name[0]!='.') {
         //printf("Entering Directory %s\n", path);
@@ -139,13 +142,15 @@ void walk(const char *pathName) {
         //printf("\tPushing File %s\n", path);
         readFile(path);
       }
-   } while ((entry = readdir(dir)));
+   	} while ((entry = readdir(dir)));
    closedir(dir);
 }
 
 int main(int argc, char const *argv[])
 {
-
+	omp_set_dynamic(atoi(argv[4])+1);
+	ROOT=(char*)malloc((strlen(argv[1])+1)*sizeof(char));
+	strcpy(ROOT,argv[1]);
 	T=(struct table*)malloc(sizeof(struct table));
 	T->size=1000;//arguement later
 	T->a=(struct record**)malloc(T->size*sizeof(struct record*));
@@ -159,7 +164,9 @@ int main(int argc, char const *argv[])
 		temp->count=1;
 		T->max[i]=temp;
 	}
+	double t1=omp_get_wtime();
 	walk(argv[1]);
+	printf("Total Time=%f\n",omp_get_wtime()-t1);
 	int k=0;
 	for(int i=0;i<T->k;i++)
 	{

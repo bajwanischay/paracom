@@ -15,6 +15,7 @@ struct table* T;
 struct stack* top=NULL;
 char* ROOT;
 double IOT,COT;
+omp_lock_t* lock;
 void push(char* path )
 {
 
@@ -63,14 +64,17 @@ void add(int i, char* word)
 	r->count=1;
 	r->rank=0;
 	r->next=NULL;
+	omp_set_lock(&(lock[i]));
 	if(T->a[i]==NULL)
 	{
-		#pragma omp critical
+		//#pragma omp critical
 		T->a[i]=r;//Lock
 		//printf("Inserted0 %s %d\n",word,i);
+		omp_unset_lock(&(lock[i]));
 		return;
 	}
-	curr=T->a[i];
+		curr=T->a[i];
+	omp_unset_lock(&(lock[i]));
 	//printf("Linked List %d:",i);
 	do
 	{
@@ -78,7 +82,7 @@ void add(int i, char* word)
 		//printf("%s ",curr->word);
 		if(!strcmp(curr->word,word))
 		{
-			#pragma omp critical
+			//#pragma omp critical
 			{
 				curr->count+=1;//Lock
 				//printf("Inserted1 %s\n",word);
@@ -94,7 +98,6 @@ void add(int i, char* word)
 		curr=curr->next;
 	}while(curr!=NULL);
 	//printf("\n");
-	#pragma omp critical
 	prev->next=r;//Lock
 	//printf("Inserted2 %s %d\n",word,i);
 	return;
@@ -167,6 +170,11 @@ int main(int argc, char const *argv[])
 	T->a=(struct record**)malloc(T->size*sizeof(struct record*));
 	T->k=atoi(argv[2]);
 	T->max=(struct record**)malloc(T->k*sizeof(struct record));
+	lock=(omp_lock_t*)malloc(T->size*sizeof(omp_lock_t));
+	for(int i=0;i<T->size;i++)
+	{
+		omp_init_lock(&(lock[i]));
+	}
 	for(int i=0;i<T->k;i++)
 	{
 		struct record* temp=(struct record*)malloc(sizeof(struct record));
