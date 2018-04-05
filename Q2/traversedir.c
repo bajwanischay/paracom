@@ -74,7 +74,6 @@ void add(int i, char* word)
 		return;
 	}
 		curr=T->a[i];
-	omp_unset_lock(&(lock[i]));
 	//printf("Linked List %d:",i);
 	do
 	{
@@ -83,28 +82,33 @@ void add(int i, char* word)
 		if(!strcmp(curr->word,word))
 		{
 			//#pragma omp critical
+			omp_set_lock(&(lock[i]))
 			{
 				curr->count+=1;//Lock
 				//printf("Inserted1 %s\n",word);
 				if(curr->count>T->max[0]->count)
 				{
-					
+					omp_set_lock(&(lock1));
 					insertKM(curr);//Lock
+					omp_unset_lock(&(lock1));
 				}
 			}
 			free(r);
+			omp_unset_lock(&(lock[i]));
 			return;
 		}
 		curr=curr->next;
 	}while(curr!=NULL);
 	//printf("\n");
+	omp_set_lock(&(lock[i]))
 	prev->next=r;//Lock
+	omp_unset_lock(&(lock[i]));
 	//printf("Inserted2 %s %d\n",word,i);
 	return;
 }
 void readFile(char* filePath)
 {
-	printf("Thread No %d Reading File:%s\n",omp_get_thread_num(),filePath);
+	//printf("Thread No %d Reading File:%s\n",omp_get_thread_num(),filePath);
 	set <string> words;
 	set<string>::iterator it;
 	double t0=omp_get_wtime();

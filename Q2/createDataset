@@ -1,16 +1,16 @@
 #!bin/bash
 
-python createDataset.py 2 16 4 64;
-python createDataset.py 2 16 6 64;
+python createDataset.py 2 16 4 32;
+python createDataset.py 2 16 6 32;
 
-python createDataset.py 2 64 4 64;
-python createDataset.py 2 64 6 64;
+python createDataset.py 2 64 4 32;
+python createDataset.py 2 64 6 32; 
 
-python createDataset.py 2 256 6 64;
+python createDataset.py 2 256 6 32;
 
-python createDataset.py 8 2 4 64;
-python createDataset.py 8 2 6 64;
+python createDataset.py 8 4 4 32;
+python createDataset.py 8 4 6 32;
 
-python createDataset.py 8 4 4 64;
-python createDataset.py 8 4 6 64;
+python createDataset.py 8 2 4 32;
+python createDataset.py 8 2 6 32;
 
